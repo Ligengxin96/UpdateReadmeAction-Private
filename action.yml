@@ -1,6 +1,14 @@
-name: 'github-update-readme-V2.0'
+name: 'UpdateReadmeAction-Private'
 description: 'Update your profile README.md to show your latest activity.'
 inputs:
+  apiPath:
+    description: "Request traffic data api path"
+    required: true
+    default: ''
+  retryCount:
+    description: "Retry count of after the traffic data api request failed"
+    required: true
+    default: 6
   header:
     description: 'The header of your README.md. Markdown supported.'
     required: true

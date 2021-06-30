@@ -49,15 +49,15 @@ const chunkArray = (array, size) => {
   return chunked;
 }
 
-const getTrafficData = async(reponame) => {
+const getTrafficData = async(apiPath, reponame, retryCount = 6) => {
   console.log(`Get traffic data.`);
   try {
     let tryCount = 0;
     return new Promise((resolve) => {
       const timer = setInterval(async() => {
-        const response = await axios.get(`http://getrepootrafficdata.herokuapp.com/v1/getrepoinfo/${reponame}?aggregate=true`);
+        const response = await axios.get(`${apiPath}/${reponame}?aggregate=true`);
         console.log(`Fetch traffic data ${tryCount + 1} times.`);
-        if (++tryCount === 6) {
+        if (++tryCount === retryCount) {
           clearInterval(timer);
           throw new Error('No response from server, please check your server health.');
         }
@@ -75,6 +75,8 @@ const getTrafficData = async(reponame) => {
 
 (async () => {
   try {
+    const apiPath = core.getInput('apiPath');
+    const retryCount = core.getInput('retryCount');
     const ref = core.getInput('ref');
     const repoCount = parseInt(core.getInput('repoCount'));
     const repoPerRow = parseInt(core.getInput('reposPerRow'));
@@ -100,7 +102,7 @@ const getTrafficData = async(reponame) => {
     let viewsData = {};
     let clonesData = {};
     try {
-      const response = await getTrafficData(repo);
+      const response = await getTrafficData(apiPath, repo, retryCount);
       viewsData = response.viewsData[0];
       clonesData = response.clonesData[0];
     } catch (error) {
