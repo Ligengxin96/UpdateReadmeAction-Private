@@ -61,7 +61,7 @@ const getTrafficData = async(apiPath, reponame, retryCount = 6) => {
           clearInterval(timer);
           throw new Error('No response from server, please check your server health.');
         }
-        if (response?.data?.isSuccess) {
+        if (response && response.data && response.data.isSuccess) {
           clearInterval(timer);
           resolve(response.data.data);
         }
