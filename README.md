@@ -1,3 +1,3 @@
-# github-update-readme-private
+# UpdateReadmeAction-Private
 
 This is private github action, don't use.
