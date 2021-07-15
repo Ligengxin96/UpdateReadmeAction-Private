@@ -49,27 +49,34 @@ const chunkArray = (array, size) => {
   return chunked;
 }
 
-const getTrafficData = async(apiPath, reponame, retryCount = 6) => {
+const getTrafficData = async(apiPath, reponame, retryCount = 5, interval = 30) => {
   console.log(`Get traffic data.`);
+  let tryCount = 0;
+  const url = `${apiPath}/${reponame}?aggregate=true`;
   try {
-    let tryCount = 0;
-    return new Promise((resolve) => {
+    const response = await axios.get(url);
+    return response.data.data;
+  } catch {
+    return new Promise((resolve, reject) => {
       const timer = setInterval(async() => {
-        const response = await axios.get(`${apiPath}/${reponame}?aggregate=true`);
-        console.log(`Fetch traffic data ${tryCount + 1} times.`);
-        if (++tryCount === retryCount) {
-          clearInterval(timer);
-          throw new Error('No response from server, please check your server health.');
+        try {
+          const response = await axios.get(url);
+          console.log(`${new Date()}: the ${tryCount + 1} times retry request ${url} successfully.`);
+          if (response && response.data && response.data.isSuccess) {
+            clearInterval(timer);
+            resolve(response.data.data);
+          }
+        } catch (error) {
+          console.error(`${new Date()}: the ${tryCount + 1} times retry request ${url} failed with error: ${error.message}`);
+        } finally {
+          ++tryCount;
+          if (tryCount === retryCount) {
+            clearInterval(timer);
+            reject(new Error('No response from server, please check your server health.'));
+          }
         }
-        if (response && response.data && response.data.isSuccess) {
-          clearInterval(timer);
-          resolve(response.data.data);
-        }
-      }, (tryCount + 1) * 10 * 1000);
+      }, interval * 1000);
     });
-  } catch (error) {
-    clearInterval(timer);
-    throw error;
   }
 }
 
@@ -77,6 +84,7 @@ const getTrafficData = async(apiPath, reponame, retryCount = 6) => {
   try {
     const apiPath = core.getInput('apiPath');
     const retryCount = core.getInput('retryCount');
+    const interval = core.getInput('interval');
     const ref = core.getInput('ref');
     const repoCount = parseInt(core.getInput('repoCount'));
     const repoPerRow = parseInt(core.getInput('reposPerRow'));
@@ -102,7 +110,7 @@ const getTrafficData = async(apiPath, reponame, retryCount = 6) => {
     let viewsData = {};
     let clonesData = {};
     try {
-      const response = await getTrafficData(apiPath, repo, retryCount);
+      const response = await getTrafficData(apiPath, repo, retryCount, interval);
       viewsData = response.viewsData[0];
       clonesData = response.clonesData[0];
     } catch (error) {

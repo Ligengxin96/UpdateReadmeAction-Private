@@ -7,8 +7,12 @@ inputs:
     default: ''
   retryCount:
     description: "Retry count of after the traffic data api request failed"
-    required: true
-    default: 6
+    required: false
+    default: 5
+  interval:
+    description: "Interval of retry request traffic data api"
+    required: false
+    default: 30
   header:
     description: 'The header of your README.md. Markdown supported.'
     required: true
