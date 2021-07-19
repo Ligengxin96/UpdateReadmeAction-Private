@@ -83,8 +83,8 @@ const getTrafficData = async(apiPath, reponame, retryCount = 5, interval = 30) =
 (async () => {
   try {
     const apiPath = core.getInput('apiPath');
-    const retryCount = core.getInput('retryCount');
-    const interval = core.getInput('interval');
+    const retryCount = core.getInput('retryCount') || 5;
+    const interval = core.getInput('interval') || 30;
     const ref = core.getInput('ref');
     const repoCount = parseInt(core.getInput('repoCount'));
     const repoPerRow = parseInt(core.getInput('reposPerRow'));
