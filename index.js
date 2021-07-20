@@ -50,7 +50,13 @@ const chunkArray = (array, size) => {
 }
 
 const getTrafficData = async(apiPath, reponame, retryCount = 5, interval = 30) => {
-  console.log(`Get traffic data.`);
+  console.log(`Get traffic data. retryCount: ${retryCount}, interval: ${interval}`);
+  if (!Number(retryCount)) {
+    retryCount = 5;
+  }
+  if (!Number(interval)) {
+    interval = 5;
+  }
   let tryCount = 0;
   const url = `${apiPath}/${reponame}?aggregate=true`;
   try {
