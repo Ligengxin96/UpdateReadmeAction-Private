@@ -55,7 +55,7 @@ const getTrafficData = async(apiPath, reponame, retryCount = 5, interval = 30) =
     retryCount = 5;
   }
   if (!Number(interval)) {
-    interval = 5;
+    interval = 30;
   }
   let tryCount = 0;
   const url = `${apiPath}/${reponame}?aggregate=true`;
@@ -89,8 +89,8 @@ const getTrafficData = async(apiPath, reponame, retryCount = 5, interval = 30) =
 (async () => {
   try {
     const apiPath = core.getInput('apiPath');
-    const retryCount = core.getInput('retryCount') || 5;
-    const interval = core.getInput('interval') || 30;
+    const retryCount = core.getInput('retryCount');
+    const interval = core.getInput('interval');
     const ref = core.getInput('ref');
     const repoCount = parseInt(core.getInput('repoCount'));
     const repoPerRow = parseInt(core.getInput('reposPerRow'));
@@ -208,6 +208,9 @@ const getTrafficData = async(apiPath, reponame, retryCount = 5, interval = 30) =
       return tableContent;
     }
 
+    const startDate = new Date(viewsData.startDate) > new Date(clonesData.startDate) ? viewsData.startDate : clonesData.startDate;
+    const endDate = new Date(viewsData.endDate) > new Date(clonesData.endDate) ? viewsData.endDate : clonesData.endDate;
+
     const readmeContentData = customReadmeFile.replace(/\${\w{0,}}/g, (match) => {
       switch (match) {
         case "${repoTable}": 
@@ -217,7 +220,7 @@ const getTrafficData = async(apiPath, reponame, retryCount = 5, interval = 30) =
         case "${subhead}":
           if (showTrafficData && trafficDataPosition === 'subhead') {
             return subhead.replace(/'{repo}'/g, repo)
-                          .replace(/'{startDate}'/g, viewsData.startDate).replace(/'{endDate}'/g, viewsData.endDate)
+                          .replace(/'{startDate}'/g, startDate).replace(/'{endDate}'/g, endDate)
                           .replace(/'{viewsData}'/g, `{ count: ${viewsData.countTotal}, uniques: ${viewsData.uniquesTotal} }`)
                           .replace(/'{clonesData}'/g, `{ count: ${clonesData.countTotal}, uniques: ${clonesData.uniquesTotal} }`);
           }
@@ -225,7 +228,7 @@ const getTrafficData = async(apiPath, reponame, retryCount = 5, interval = 30) =
         case "${footer}": 
           if (showTrafficData && trafficDataPosition === 'footer') {
             return footer.replace(/'{repo}'/g, repo)
-                          .replace(/'{startDate}'/g, viewsData.startDate).replace(/'{endDate}'/g, viewsData.endDate)
+                          .replace(/'{startDate}'/g, startDate).replace(/'{endDate}'/g, endDate)
                           .replace(/'{viewsData}'/g, `{ count: ${viewsData.countTotal}, uniques: ${viewsData.uniquesTotal} }`)
                           .replace(/'{clonesData}'/g, `{ count: ${clonesData.countTotal}, uniques: ${clonesData.uniquesTotal} }`);
           }
